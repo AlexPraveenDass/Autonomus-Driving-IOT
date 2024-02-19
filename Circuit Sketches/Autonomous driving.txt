@@ -1,0 +1,45 @@
+
+#include <IRremote.h>
+
+int RECV_PIN = 3;
+int bulb = 10;
+int motor = 11;
+int itsONled[] = {0,0,0,0};
+#define code1  0xFD08F7 // code received from button 1
+#define code2  0xFD8877 // code received from button 2
+
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+void setup()
+{  
+  irrecv.enableIRIn();  // Start the receiver
+  pinMode(bulb, OUTPUT);
+  pinMode(motor, OUTPUT);
+}
+
+void loop() {
+  if (irrecv.decode(&results)) {
+    unsigned int value = results.value;
+    switch(value) {
+       case code1:
+         if(itsONled[1] == 1) {        
+            digitalWrite(bulb, LOW);   
+            itsONled[1] = 0;           
+         } else {                     
+             digitalWrite(bulb, HIGH); 
+             itsONled[1] = 1;          
+         }
+          break; 
+       case code2:
+         if(itsONled[2] == 1) {
+            digitalWrite(motor, LOW);
+            itsONled[2] = 0;
+         } else {
+             digitalWrite(motor, HIGH);
+             itsONled[2] = 1;
+         }
+          break;       
+    }
+    irrecv.resume(); // Receive the next value
+  }
+}

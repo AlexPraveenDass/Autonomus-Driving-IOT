@@ -1,0 +1,47 @@
+const int buzzerPin = 2;
+const int forcePin = A1;
+
+const int ledR = 5;
+const int ledB = 6;
+const int ledG = 7;
+
+int forceValue = 0;
+int val;
+
+void setup()
+{
+  pinMode(forcePin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+  
+  pinMode(ledR, OUTPUT);
+  pinMode(ledB, OUTPUT);
+  pinMode(ledG, OUTPUT);
+  
+  Serial.begin(9600);
+}
+
+void loop()
+{
+  forceValue = analogRead(forcePin);
+  noTone(buzzerPin);
+  tone(buzzerPin, forceValue);
+  
+  val = map(forceValue, 0, 914, 0, 100);
+  
+  if (val >= 95) {
+    toggleLED(LOW, HIGH, LOW);
+  } else if (val >= 80) {
+    toggleLED(HIGH, HIGH, LOW);
+  } else {
+    toggleLED(HIGH, LOW, LOW);
+  }
+  
+  delay(10);
+}
+
+void toggleLED(int red, int green, int blue)
+{
+  digitalWrite(ledR, green);
+  digitalWrite(ledB, blue);
+  digitalWrite(ledG, red);
+}

@@ -1,0 +1,39 @@
+#include  "Servo.h"
+  
+Servo monservo;
+
+int PIN_PUSH_VERSE1 = 8;
+
+int PIN_MONSERVO = 9;
+int POUSOIR_VERSE1 = 0;
+
+
+
+void setup() {
+
+  pinMode(PIN_PUSH_VERSE1, INPUT);
+  digitalWrite(PIN_PUSH_VERSE1, HIGH);
+
+  
+  pinMode(PIN_MONSERVO, OUTPUT);
+  
+
+
+  monservo.attach(PIN_MONSERVO);
+  monservo.write(0);
+
+}
+
+void loop() {
+  POUSOIR_VERSE1 = digitalRead(PIN_PUSH_VERSE1);
+
+  if (POUSOIR_VERSE1 == LOW)  {
+    monservo.write(90);
+    delay(4000);
+    monservo.write(0);
+
+  }
+ 
+}
+
+

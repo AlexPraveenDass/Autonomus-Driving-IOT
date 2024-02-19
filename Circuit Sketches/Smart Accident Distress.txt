@@ -1,0 +1,178 @@
+#include <LiquidCrystal.h>
+
+
+
+const int rs = 12, en = 13, d4 = 8, d5 = 9, d6 = 10, d7 = 11;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+const int buzzer = 3;
+const int RED = 7;
+const int GREEN = 6;
+
+
+const int peizo = 4;
+unsigned int i = 0;
+#define PEIZO_ON LOW
+#define PEIZO_OFF HIGH
+
+#define BUZZER_ON {for(i=0;i<50;i++) {digitalWrite(buzzer, HIGH); delay(10);digitalWrite(buzzer, LOW);delay(10);}}
+#define BUZZER_OFF {digitalWrite(buzzer, LOW);}
+
+#define RED_ON { digitalWrite(RED, HIGH);   digitalWrite(GREEN, LOW);  }
+#define GREEN_ON { digitalWrite(RED, LOW);   digitalWrite(GREEN, HIGH);  }
+
+const char senderNumber1[] = "9029145142";
+const char senderNumber2[] = "9029145142";
+const char sms_body_1[] = "Accident detected";
+#define PINNUMBER ""
+
+
+void enter()
+{
+  Serial.print("\r\n");
+}
+
+void initialise_modem()
+{
+  enter(); Serial.print("AT"); enter();  delay(500);
+  enter(); Serial.print("ATE0");  enter(); delay(500);
+  enter(); Serial.print("AT+CPIN?");  enter(); delay(500);
+  enter(); Serial.print("AT+CMGF=1"); enter(); delay(500);
+  enter(); Serial.print("AT+CNMI=2,1"); enter(); delay(500);
+  enter(); Serial.print("AT&W"); enter(); delay(500);
+}
+
+
+
+void send_sms(unsigned char user)
+{
+  enter(); Serial.print("AT+CMGS=\"");
+  
+  if(user==1) { Serial.print(senderNumber1);}
+  else  { Serial.print(senderNumber2);}
+  
+  Serial.println('"');
+  delay(500);
+  Serial.println(sms_body_1);
+  Serial.println("Vehicle Number: TN-09 AP 1997");
+  Serial.print("Latitude= XXXXXX.XX");
+  Serial.print(" Longitude= YYYYYY.YY");
+  Serial.write(0x1a);
+  enter();
+  delay(1000);
+}
+
+
+
+
+void setup()
+{
+  // put your setup code here, to run once:
+  pinMode(peizo, INPUT_PULLUP);
+  digitalWrite(peizo, HIGH);
+  pinMode(GREEN,OUTPUT);
+  pinMode(RED,OUTPUT);
+  GREEN_ON;
+  pinMode(buzzer, OUTPUT);
+  BUZZER_OFF;
+  Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  delay(100);
+  lcd.setCursor(0, 0);
+  lcd.print("    Accident    ");
+  lcd.setCursor(0, 1);
+  lcd.print("Detection System");
+  delay(1000);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Initializing....");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+  initialise_modem();
+
+  
+  delay(1000);
+  lcd.setCursor(0, 0);
+  lcd.print("Ready....       ");
+
+}
+
+
+unsigned int loop_count = 0 , len = 0;
+void loop()
+{
+  // put your main code here, to run repeatedly:
+  if (digitalRead(peizo) == PEIZO_ON)
+  {
+    delay(1);
+    if (digitalRead(peizo) == PEIZO_ON)
+    {
+      RED_ON;
+      lcd.setCursor(0, 0);
+      lcd.print("    Accident    ");
+      lcd.setCursor(0, 1);
+      lcd.print("    Detected    ");
+      
+        BUZZER_ON;
+      delay(5000);
+        
+            lcd.setCursor(0, 0);
+      lcd.print("Tracking GPS....");
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+    lcd.setCursor(0,0);
+  lcd.print("                ");
+  lcd.setCursor(0, 1);
+  lcd.print("                ");
+        lcd.setCursor(0, 0);
+        lcd.print("Lat: 1234.4558");
+        lcd.print(" N ");
+
+        lcd.setCursor(0, 1);
+        lcd.print("Lon: 2258.7589");
+        lcd.print(" E ");
+        
+    
+
+      delay(1000);
+      lcd.setCursor(0, 0);
+      lcd.print("Sending SMS 1....");
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+
+      send_sms(1);
+      delay(5000);
+      lcd.setCursor(0, 0);
+      lcd.print("Sending SMS 2....");
+      send_sms(2);
+      delay(5000);
+      
+      lcd.setCursor(0, 0);
+      lcd.print("SMS Sent........");
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+
+      BUZZER_OFF
+      lcd.setCursor(0, 0);
+      lcd.print("waiting for help");
+      lcd.setCursor(0, 1);
+      lcd.print("                ");
+
+      while (1);
+    }
+  }
+
+  else
+  {
+
+    BUZZER_OFF;
+
+   }
+  delay(5);
+
+}
+
